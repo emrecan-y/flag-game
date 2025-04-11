@@ -29,18 +29,18 @@ public class StatsFragment extends Fragment {
                 new ViewModelProvider(this).get(StatsViewModel.class);
 
         binding = FragmentStatsBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
 
-        return root;
+        return  binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         MainActivity.setStatsMenuActive();
-        binding.statisticRoundsPlayed.setText(String.valueOf(FlagGame.getRoundsPlayedGlobal()));
-        binding.statisticRoundsLost.setText(String.valueOf(FlagGame.getRoundsLostGlobal()));
-        binding.statisticRoundsWon.setText(String.valueOf(FlagGame.getRoundsWonGlobal()));
+        FlagGame instance = FlagGame.getInstance();
+        binding.statisticRoundsPlayed.setText(String.valueOf(instance.getRoundsPlayedGlobal()));
+        binding.statisticRoundsLost.setText(String.valueOf(instance.getRoundsLostGlobal()));
+        binding.statisticRoundsWon.setText(String.valueOf(instance.getRoundsWonGlobal()));
     }
 
     @Override

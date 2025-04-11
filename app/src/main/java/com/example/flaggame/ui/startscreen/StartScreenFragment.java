@@ -50,7 +50,7 @@ public class StartScreenFragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {
         Button pressedButton = (Button) v;
         String difficulty = pressedButton.getText().toString().toUpperCase();
-        FlagGame.start(difficulty);
+        FlagGame.getInstance().start(difficulty);
         Navigation.findNavController(v).navigate(R.id.nav_game);
         MainActivity.setMenuDrawerGame();
         MainActivity.setGameMenuActive();

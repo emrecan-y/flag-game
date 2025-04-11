@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         packageName = this.getPackageName();
         directory = getApplicationInfo().dataDir;
-        FlagGame.init(this);
+        FlagGame.getInstance().init(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         optionsMenu = menu;
 
-        if(FlagGame.gameIsActive()){
+        if(FlagGame.getInstance().gameIsActive()){
             setGameMenuActive();
             setMenuDrawerGame();
             Navigation.findNavController(this, R.id.nav_host_fragment_content_main).navigate(R.id.nav_game);
@@ -80,12 +80,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.reset_game) {
-            FlagGame.reset();
+            FlagGame.getInstance().reset();
             Navigation.findNavController(this, R.id.nav_host_fragment_content_main).navigate(R.id.nav_startscreen);
             setMenuDrawerStartScreen();
 
         } else if (item.getItemId() == R.id.reset_stats) {
-           FlagGame.resetGlobalStats();
+           FlagGame.getInstance().resetGlobalStats();
            Navigation.findNavController(this, R.id.nav_host_fragment_content_main).navigate(R.id.nav_stats);
         }
         return super.onOptionsItemSelected(item);

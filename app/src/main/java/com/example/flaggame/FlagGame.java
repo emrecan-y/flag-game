@@ -19,31 +19,43 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class FlagGame {
-    private static final Random RANDOM = new Random();
-    private static Resources resources;
-    private static AssetManager assets;
-    private static Path pathToGameStateCsv;
+    private final Random random = new Random();
+    private  Resources resources;
+    private  AssetManager assets;
+    private  Path pathToGameStateCsv;
 
+    private  boolean gameIsActive;
+    private  boolean showResultIsActive;
+    private  List<Flag> flagsUnedited;
+    private  List<Flag> flagsCurrentGame;
+    private  AnswerSet answerSet;
+    private  String difficulty;
+    private  int roundsPlayed;
+    private  int roundsWon;
+    private  int roundsLost;
+    private  int roundsPlayedGlobal;
+    private  int roundsWonGlobal;
+    private  int roundsLostGlobal;
 
-    private static boolean gameIsActive;
-    private static boolean showResultIsActive;
-    private static List<Flag> flagsUnedited;
-    private static List<Flag> flagsCurrentGame;
-    private static AnswerSet answerSet;
-    private static String difficulty;
-    private static int roundsPlayed;
-    private static int roundsWon;
-    private static int roundsLost;
-    private static int roundsPlayedGlobal;
-    private static int roundsWonGlobal;
-    private static int roundsLostGlobal;
+    private static FlagGame instance;
 
 
     private FlagGame() {
 
     }
 
-    public static void init(MainActivity mainActivity) {
+    public static FlagGame getInstance(){
+        if(this.instance == null){
+            synchronized(FlagGame.class){
+                if(this.instance == null){
+                    this.instance = new FlagGame();
+                }
+            }
+        }
+        return this.instance;
+    }
+
+    public  void init(MainActivity mainActivity) {
         if (flagsUnedited == null) {
             pathToGameStateCsv = Paths.get(MainActivity.getDirectory() + "/gameState.csv");
             resources = mainActivity.getResources();
@@ -53,8 +65,8 @@ public class FlagGame {
         }
     }
 
-    public static void start(String difficulty) {
-        FlagGame.difficulty = difficulty;
+    public  void start(String difficulty) {
+        this.difficulty = difficulty;
         flagsCurrentGame = getFlagsUneditedFilteredByDifficulty();
         gameIsActive = true;
         if (answerSet == null) {
@@ -62,7 +74,7 @@ public class FlagGame {
         }
     }
 
-    public static void reset() {
+    public  void reset() {
         resetLocalStats();
         flagsCurrentGame.clear();
         gameIsActive = false;
@@ -75,21 +87,21 @@ public class FlagGame {
     }
 
 
-    public static void resetLocalStats() {
+    public  void resetLocalStats() {
         roundsPlayed = 0;
         roundsWon = 0;
         roundsLost = 0;
         writeGameStateCsv();
     }
 
-    public static void resetGlobalStats() {
+    public  void resetGlobalStats() {
         roundsPlayedGlobal = 0;
         roundsWonGlobal = 0;
         roundsLostGlobal = 0;
         writeGameStateCsv();
     }
 
-    public static void correctAnswer() {
+    public  void correctAnswer() {
         //Bodge fix for emtpy flaglist
         if (flagsCurrentGame.size() > 1) {
             flagsCurrentGame.remove(answerSet.getRightAnswer());
@@ -102,7 +114,7 @@ public class FlagGame {
         writeGameStateCsv();
     }
 
-    public static void wrongAnswer() {
+    public  void wrongAnswer() {
         showResultIsActive = true;
         roundsLost++;
         roundsLostGlobal++;
@@ -111,7 +123,7 @@ public class FlagGame {
         writeGameStateCsv();
     }
 
-    public static void readFlagCsv() {
+    public  void readFlagCsv() {
         flagsUnedited = new ArrayList<>();
         String currentLine;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(assets.open("flags.csv"), StandardCharsets.UTF_8))) {
@@ -126,7 +138,7 @@ public class FlagGame {
         }
     }
 
-    public static void writeGameStateCsv() {
+    public  void writeGameStateCsv() {
         try (BufferedWriter writer = Files.newBufferedWriter(pathToGameStateCsv)) {
             StringBuilder builderStats = new StringBuilder();
             builderStats.append(gameIsActive);
@@ -173,7 +185,7 @@ public class FlagGame {
         }
     }
 
-    public static void readGameStateCsv() {
+    public  void readGameStateCsv() {
         String currentLine;
         try (BufferedReader reader = Files.newBufferedReader(pathToGameStateCsv)) {
             currentLine = reader.readLine();
@@ -207,7 +219,7 @@ public class FlagGame {
         }
     }
 
-    public static AnswerSet createAnswerSetFromCsv(String[] answerSetCells) {
+    public  AnswerSet createAnswerSetFromCsv(String[] answerSetCells) {
         Flag rightAnswer = getFlagFromCountryName(answerSetCells[0]);
         List<Flag> answerChoices = new ArrayList<>();
         answerChoices.add(getFlagFromCountryName(answerSetCells[1]));
@@ -217,13 +229,13 @@ public class FlagGame {
         return new AnswerSet(rightAnswer, answerChoices);
     }
 
-    public static Flag getFlagFromCountryName(String countryName) {
+    public  Flag getFlagFromCountryName(String countryName) {
         Optional<Flag> flag = flagsUnedited.stream().filter(f -> f.getCountryName().equals(countryName)).findAny();
         return flag.orElse(null);
     }
 
 
-    public static List<Flag> getFlagsUneditedFilteredByDifficulty() {
+    public  List<Flag> getFlagsUneditedFilteredByDifficulty() {
         switch (difficulty) {
             case "EASY":
                 return flagsUnedited.stream().filter(flag -> flag.getLevelOfFamiliarity() < 4).collect(Collectors.toList());
@@ -234,7 +246,7 @@ public class FlagGame {
         }
     }
 
-    public static List<Flag> getCorrectlyGuessedFlagsCurrentGame() {
+    public  List<Flag> getCorrectlyGuessedFlagsCurrentGame() {
         if (gameIsActive()) {
             List<Flag> flags = getFlagsUneditedFilteredByDifficulty();
             return flags.stream().filter(flag -> !flagsCurrentGame.contains(flag)).collect(Collectors.toList());
@@ -243,71 +255,71 @@ public class FlagGame {
         }
     }
 
-    public static void pickRandomCurrentFlag() {
-        Flag newFlag = flagsCurrentGame.get(RANDOM.nextInt(flagsCurrentGame.size()));
+    public  void pickRandomCurrentFlag() {
+        Flag newFlag = flagsCurrentGame.get( this.random.nextInt(flagsCurrentGame.size()));
         updateAnswerSet(newFlag);
         writeGameStateCsv();
     }
 
-    public static Flag getRandomFlag() {
-        return flagsUnedited.get(RANDOM.nextInt(flagsUnedited.size()));
+    public  Flag getRandomFlag() {
+        return flagsUnedited.get(this.random.nextInt(flagsUnedited.size()));
     }
 
-    private static void updateAnswerSet(Flag newFlag) {
+    private  void updateAnswerSet(Flag newFlag) {
         List<Flag> answersChoices = new ArrayList<>();
         answersChoices.add(newFlag);
         while (answersChoices.size() < 4) {
-            Flag randomFlag = FlagGame.getRandomFlag();
+            Flag randomFlag = this.getRandomFlag();
             if (!answersChoices.contains(randomFlag)) {
                 answersChoices.add(randomFlag);
             }
         }
         Collections.shuffle(answersChoices);
-        FlagGame.answerSet = new AnswerSet(newFlag, answersChoices);
+        this.answerSet = new AnswerSet(newFlag, answersChoices);
     }
 
-    public static Flag getCurrentFlag() {
+    public  Flag getCurrentFlag() {
         return answerSet.getRightAnswer();
     }
 
-    public static AnswerSet getAnswerSet() {
-        return FlagGame.answerSet;
+    public  AnswerSet getAnswerSet() {
+        return this.answerSet;
     }
 
-    public static int getRoundsPlayed() {
+    public  int getRoundsPlayed() {
         return roundsPlayed;
     }
 
-    public static int getRoundsWon() {
+    public  int getRoundsWon() {
         return roundsWon;
     }
 
-    public static int getRoundsLost() {
+    public  int getRoundsLost() {
         return roundsLost;
     }
 
-    public static int getRoundsPlayedGlobal() {
+    public  int getRoundsPlayedGlobal() {
         return roundsPlayedGlobal;
     }
 
-    public static int getRoundsWonGlobal() {
+    public  int getRoundsWonGlobal() {
         return roundsWonGlobal;
     }
 
-    public static int getRoundsLostGlobal() {
+    public  int getRoundsLostGlobal() {
         return roundsLostGlobal;
     }
 
-    public static boolean gameIsActive() {
+    public  boolean gameIsActive() {
         return gameIsActive;
     }
 
-    public static boolean isShowResultIsActive() {
+    public  boolean isShowResultIsActive() {
         return showResultIsActive;
     }
 
-    public static void setShowResultIsActive(boolean showResultIsActive) {
-        FlagGame.showResultIsActive = showResultIsActive;
+    public  void setShowResultIsActive(boolean showResultIsActive) {
+        this.showResultIsActive = showResultIsActive;
     }
 }
 

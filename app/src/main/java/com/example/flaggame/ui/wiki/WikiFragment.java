@@ -39,7 +39,7 @@ public class WikiFragment extends Fragment {
 
         recyclerView = binding.wiki;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        flags = FlagGame.getCorrectlyGuessedFlagsCurrentGame();
+        flags = FlagGame.getInstance().getCorrectlyGuessedFlagsCurrentGame();
         wikiAdapter = new WikiAdapter(flags);
         recyclerView.setAdapter(wikiAdapter);
         return root;

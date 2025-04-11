@@ -43,9 +43,10 @@ public class GameFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        roundsPlayed.setText(String.valueOf(FlagGame.getRoundsPlayed()));
-        roundsWon.setText(String.valueOf(FlagGame.getRoundsWon()));
-        roundsLost.setText(String.valueOf(FlagGame.getRoundsLost()));
+        FlagGame instance = FlagGame.getInstance();
+        roundsPlayed.setText(String.valueOf(instance.getRoundsPlayed()));
+        roundsWon.setText(String.valueOf(instance.getRoundsWon()));
+        roundsLost.setText(String.valueOf(instance.getRoundsLost()));
     }
 
     @Override
@@ -90,22 +91,24 @@ public class GameFragment extends Fragment implements View.OnClickListener {
 
 
     private void fillButtons() {
-        List<Flag> answerChoices = new ArrayList<>(FlagGame.getAnswerSet().getAnswersChoices());
+        List<Flag> answerChoices = new ArrayList<>(FlagGame.getInstance().getAnswerSet().getAnswersChoices());
         for (int i = 0; i < selectButtons.size(); i++) {
             selectButtons.get(i).setText(answerChoices.get(i).getCountryName());
         }
     }
 
     public void statRoundWin() {
-        FlagGame.correctAnswer();
-        binding.statViewWon.setText(String.valueOf(FlagGame.getRoundsWon()));
-        binding.statViewRoundNumber.setText(String.valueOf(FlagGame.getRoundsPlayed()));
+        FlagGame instance = FlagGame.getInstance();
+        instance.correctAnswer();
+        binding.statViewWon.setText(String.valueOf(instance.getRoundsWon()));
+        binding.statViewRoundNumber.setText(String.valueOf(instance.getRoundsPlayed()));
     }
 
     public void statRoundLost() {
-        FlagGame.wrongAnswer();
-        binding.statViewLost.setText(String.valueOf(FlagGame.getRoundsLost()));
-        binding.statViewRoundNumber.setText(String.valueOf(FlagGame.getRoundsPlayed()));
+        FlagGame instance = FlagGame.getInstance();
+        instance.wrongAnswer();
+        binding.statViewLost.setText(String.valueOf(instance.getRoundsLost()));
+        binding.statViewRoundNumber.setText(String.valueOf(instance.getRoundsPlayed()));
     }
 
     public void initButtons() {
@@ -124,15 +127,17 @@ public class GameFragment extends Fragment implements View.OnClickListener {
 
     private void showQuestionOnGameView() {
         ImageView img = container.findViewById(R.id.current_flag);
-        answerSet = FlagGame.getAnswerSet();
-        Flag currentFlag = FlagGame.getCurrentFlag();
+        FlagGame instance = FlagGame.getInstance();
+        answerSet = instance.getAnswerSet();
+        Flag currentFlag = instance.getCurrentFlag();
         int drawableResourceId = currentFlag.getDrawableResourceId();
         img.setImageResource(drawableResourceId);
     }
 
     @Override
     public void onClick(View view) {
-        if (FlagGame.isShowResultIsActive()) {
+        FlagGame instance = FlagGame.getInstance();
+        if (instance.isShowResultIsActive()) {
             onClickSkip();
         }else if(view.getClass() == MaterialButton.class){
 
@@ -158,13 +163,13 @@ public class GameFragment extends Fragment implements View.OnClickListener {
                 }
             }
 
-                FlagGame.pickRandomCurrentFlag();
+                instance.pickRandomCurrentFlag();
 
         }
     }
 
     public void onClickSkip() {
-        FlagGame.setShowResultIsActive(false);
+        FlagGame.getInstance().setShowResultIsActive(false);
         showQuestionOnGameView();
 
         initButtons();
